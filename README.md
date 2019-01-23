@@ -2,15 +2,13 @@
 
 You are tasked with creating a regression model based on the Ames Housing Dataset. This model will predict the price of a house at sale. We need to review the different factors and consider what are the best predictors of price and create a model that will predict price from these predictors.
 
-# The Problem
 
-You are tasked with creating a regression model based on the Ames Housing Dataset. This model will predict the price of a house at sale. We need to review the different factors and consider what are the best predictors of price and create a model that will predict price from these predictors.
 # Exploratory Data Analysis
 
 ## Checking for outliers
-The codebok says this: "There are 5 observations that an instructor may wish to remove from the data set before giving it to students (a plot of SALE PRICE versus GR LIV AREA will indicate them quickly). Three of them are true outliers (Partial Sales that likely don’t represent actual market values) and two of them are simply unusual sales (very large houses priced relatively appropriately)." To check if those existed in our data set.
-![](./Outliers.png)
-We can see that in the training set there are 2 ourliers. For Modelling purposes we are going to remove these as leaving the means we will likely overfit our data to those outfitters.
+The codebook says this: "There are 5 observations that an instructor may wish to remove from the data set before giving it to students (a plot of SALE PRICE versus GR LIV AREA will indicate them quickly). Three of them are true outliers (Partial Sales that likely don’t represent actual market values) and two of them are simply unusual sales (very large houses priced relatively appropriately)." To check if those existed in our data set.
+![](./images/Outliers.png)
+We can see that in the training set there are 2 outliers. For Modeling purposes we are going to remove these as leaving the means we will likely overfit our data to those outfitters.
 
 
 ## Checking for Nulls
@@ -43,17 +41,17 @@ BsmtFin SF 2  |       1
 Total Bsmt SF  |      1
 BsmtFin SF 1    |     1
 
-We can see that there are quite a few null values in the system. A review of the codebook suggest that many of them are due to features having NA as one of the categories. NA in the code book meant that this feature did not exist in the house. These will be converted to 0 for the numeric features and "No Feature" in the categoricals features.
+We can see that there are quite a few null values in the system. A review of the codebook suggest that many of them are due to features having NA as one of the categories. NA in the code book meant that this feature did not exist in the house. These will be converted to 0 for the numeric features and "No Feature" in the categorical features.
 
 ### Nulls that require special attention.
 #### Basement
-Based on what NA should mean in the dataset all of the basement nulls should be the same. This means that we need to identify what is going on with the 3 extra Nulls in Exposure and BsmtFin Type 2. A review of the data and codebook suggest that it was likely entry error. Since we do not know we are going to flll the house that have a basemnt but are null for those two features with Unknown. The rest of the nulls (55) will be filled with 0 or no basement.
+Based on what NA should mean in the dataset all of the basement nulls should be the same. This means that we need to identify what is going on with the 3 extra Nulls in Exposure and BsmtFin Type 2. A review of the data and codebook suggest that it was likely entry error. Since we do not know we are going to fill the house that have a basement but are null for those two features with Unknown. The rest of the nulls (55) will be filled with 0 or no basement.
 
 #### Lot Frontage
-Lot Frontage has a statistically signaficant number of nulls but doesnt have an explained reason for them in the codebook.
+Lot Frontage has a statistically significant number of nulls but doesn't have an explained reason for them in the codebook.
 *theories*
 1. All Alley plots
-    * If we filter to only null Lot Frontage properties we ony find 8 properties with Alleys
+    * If we filter to only null Lot Frontage properties we only find 8 properties with Alleys
 2. All Condos
     * If we filter to only null Lot Frontage properties we see that subclass with the most nulls is '1-STORY 1946 & NEWER ALL STYLES' (131 ) so they can not all be condos.
 
@@ -72,9 +70,9 @@ Lot Config_FR2	|-2.865836	|2.865836
 MS Zoning_RL	|2.278753|	2.278753
 Neighborhood_BrDale	|-2.249133	|2.249133
 
-Based on these results I decided to model on Lot Area and Neighbor hoods because I decided that since some neighborhoods were highly coorelated and Lot area was the most coorlated that these would be the best to create a model on to predict.
+Based on these results I decided to model on Lot Area and Neighbor hoods because I decided that since some neighborhoods were highly correlated and Lot area was the most correlated that these would be the best to create a model on to predict.
 
-![](./Frontage.png)
+![](./images/Frontage.png)
 
 When comparing lot area to to lot frontage we can see that there is a pretty linear relationship between the two factors. So I created a linear regression to predict the lot frontage for the null entries from those properties neighborhood and lot area.
 
@@ -87,45 +85,27 @@ Exter Qual, Exter Cond, Bsmt Qual, Bsmt Cond, Heating QC, Kitchen Qual, Fireplac
 
 ## Polynomial features
 ### Total Sq_Ft
-I felt that the total sq_ft of a property is a better predictor of price then the sq_ft seperated. I created a new column that added the Gr liv area, Total Bsmt SF, and Low Qual Fin SF and removed the columns from the model.
+I felt that the total sq_ft of a property is a better predictor of price then the sq_ft separated. I created a new column that added the Gr liv area, Total Bsmt SF, and Low Qual Fin SF and removed the columns from the model.
 ### Beds/Bath
-Since number of beds and baths are pretty coorelated to each other I added all the bedroom and bath number together and removed those columns from the model.
+Since number of beds and baths are pretty correlated to each other I added all the bedroom and bath number together and removed those columns from the model.
 
 
 # Model
 
-I modelled with all of the features excepting ID and PID and the columns I created polynomial columns with. I logged the sales price to normalize the positive skew.
+I modeled with all of the features excepting ID and PID and the columns I created polynomial columns with. I logged the sales price to normalize the positive skew.
 
 ## Testing Different Regressions:
 
-Linear Regression:
-CVS Train: [0.8252809  0.75478454 0.87366335 0.8608988  0.75222489]
-Mean CVS Train: 0.8133704951213396
-CVS Test: [-5.05796918e+18 -3.83813829e+19 -1.08732582e+22 -2.69632463e+21
- -1.15342050e+25]
-Mean CVS Test: -2.3095636116604097e+24
+|Model||Train Mean $R^2$ Cross Validation Score|Test Mean $R^2$ Cross Validation Score|                     
+|---|---|---|---|
 
-Ridge:
-CVS Train: [0.88628173 0.84569842 0.86990372 0.90533074 0.84002131]
-Mean CVS Train: 0.8694471822974466
-CVS Test: [0.86118712 0.9063028  0.87820719 0.90181075 0.89991175]
-Mean CVS Test: 0.8894839236058634
-
-Lasso:
-CVS Train: [0.78516213 0.6872191  0.87807077 0.91708727 0.81567102]
-Mean CVS Train: 0.816642057611101
-CVS Test: [0.87646166 0.92168652 0.895976   0.91834878 0.90162464]
-Mean CVS Test: 0.902819519448052
-
-Elastic Net
-CVS Train: [-0.01642002 -0.03773462 -0.08133642 -0.02579093 -0.03728087]
-Mean CVS Train: -0.039712571747666514
-CVS Test: [-2.11768241e-05 -1.36275080e-02 -3.65697826e-03 -7.10933141e-05
- -4.23504784e-03]
-Mean CVS Test: -0.004322360854397944
+Linear Regression| 0.8133704951213396| -2.3095636116604097e+24
+Ridge| 0.8694471822974466| 0.8894839236058634
+Lasso| 0.816642057611101| 0.902819519448052
+Elastic Net|0.039712571747666514| -0.004322360854397944
 
 
-Lasso did the best so I decided to model with Lasso.
+The lasso model preformed the best giving us a 90% explained variance in the test set.
 
 
 I found that Overall Quality and total square feet were the best indicators for sales price in my test. We also can see that there is high correlation with the Kitchen quality, Concrete foundation and Number of cars the Garage can handle.
@@ -143,10 +123,10 @@ Kitchen Qual	|1.023822	|1.023822
 Foundation_PConc|	1.023740|	1.023740
 Garage Cars|	1.022152|	1.022152
 
-![](./Qualvlogprice.png)
-![](./Sq_ftvlogprice.png)
+![](./images/Qualvlogprice.png)
+![](./images/Sq_ftvlogprice.png)
 
 
 # Next Steps
 
-More review of the features that have high coorelation. Maybe creating more polynomial features.
+More reviewing of the features. Perhaps drop or create more polynomial features. Rather than inputing the nulls as 0, unknown or with regression imput these values using random assignment. 
